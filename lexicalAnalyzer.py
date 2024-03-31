@@ -8,7 +8,8 @@ allKeywords = keyword.kwlist
 keyword_regex = r'\b(?:' + '|'.join(allKeywords) + r')\b'
 
 # Regular expressions for the operators, separators, identifiers, and integers (tokens)
-operator_regex = r'[+\-*/%<>=!&|^~]=?|<<=?|>>=?|\*\*=?|\/\/=?|==|!=|<=|>=|in|not in|is|is not|and|or|not'
+#operator_regex = r'[+\-*/%=<>&|^~]=?|<<=?|>>=?|\*\*=?|\/\/=?|==|!=|<=|>=|in|not in|is|is not|and|or|not|(?<=[\+\-*/%<>&|^~])=(?![>=])|(?<=[<>!])=(?!=)'
+operator_regex = r'[-+*/%=<>&|^~]=?|<<=?|>>=?|\*\*=?|\/\/=?|==|!=|<=|>=|in|not in|is|is not|and|or|not'
 separator_regex = r'[()\{\};]'
 identifier_regex = r'[a-zA-Z_]\w*'
 integer_regex = r'\b\d+\b'
@@ -22,10 +23,9 @@ def tokenize(input_file):
 
     with open(input_file, 'r') as file: # Open the file and read it
         for line in file: # Iterate through each line of the file
-           
+
             # Remove any comments and whitespace
             line = re.sub(r'//.*|/\*.*?\*/', '', line).strip()
-    
             
             # Tokenize the line using the combined tokens
             line_tokens = re.findall(tokens, line)
@@ -36,7 +36,7 @@ def tokenize(input_file):
     return allTokens
 
 def main():
-    input_file = 'test1.txt'  # Path to the input file
+    input_file = 'test1.txt'  # Path to the input file (here you insert the name of the file)
     tokens = tokenize(input_file)  # Tokenize the code
 
     # Remove empty strings from the list of tokens
@@ -45,26 +45,23 @@ def main():
     tokens_classified = {}
     # Append token classification to list
     for token in tokens:
-        if token in operator_regex:
-            tokens_classified[token] = 'operator'
-        elif token in separator_regex:
-            tokens_classified[token] = 'seperator'
-        elif token in keyword_regex:
+        if re.match(operator_regex, token):
+            # Split compound operators into individual tokens
+            ops = re.findall(r'\b\w{2,}\b|.', token)
+            tokens_classified.update({op: 'operator' for op in ops if op.strip()})
+        elif re.match(separator_regex, token):
+            tokens_classified[token] = 'separator'
+        elif re.match(keyword_regex, token):
             tokens_classified[token] = 'keyword'
-        elif token in integer_regex:
+        elif re.match(integer_regex, token):
             tokens_classified[token] = 'integer'
         else:
             tokens_classified[token] = 'identifier'
     
-    # Print tokens 
-    # print(tokens)
-
-    # Print tokens with classification
-    # print(tokens_classified)
-
     # Printing output as described in instructions
-    for i in tokens_classified:
-        print('"' + i + '" = ' + tokens_classified[token])
+    for token, classification in tokens_classified.items():
+        print(f'"{token}" = {classification}')
+
 
 if __name__ == "__main__":
     main() 
