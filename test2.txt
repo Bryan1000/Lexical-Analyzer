@@ -1,5 +1,5 @@
-int time = 22;
-if (time < 10) {
+int time = 22.0;
+if (time < 10.1234) {
   cout << "Good morning.";
 } else if (time < 20) {
   cout << "Good day.";

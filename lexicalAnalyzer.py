@@ -32,41 +32,50 @@ def tokenize(input_file):
     return allTokens
 
 def main():
-    input_file = 'test2.txt'  # Path to the input file (here you insert the name of the file)
+    input_file = 'test1.txt'  # Path to the input file (here you insert the name of the file)
     tokens = tokenize(input_file)  # Tokenize the code
 
     # Remove empty strings from the list of tokens
     tokens = [token for token in tokens if token]
     
-    tokens_classified = []
-    is_string = False
+    # Initialize list to store the classified tokens
+    tokens_classified = [] 
+    # A flag to track whether the current token is part of a string literal
+    is_string = False   
     temp_str = ""
-    # Append token classification to list
+    # Append token classification to list (iterate through each token in list)
     for i in range(len(tokens)):
+        # If the current token is part of a string literal and not a closing quote
         if is_string and tokens[i] != '"':
+            # Append the current token to the temporary string representing the string literal
             temp_str = temp_str + " " + tokens[i]
             continue
-            
+         # If the current token is a quote   
         if tokens[i] == '"':
-            if is_string:
-                tokens_classified.append([temp_str.strip(), 'string literal'])
+            if is_string:  # If it's the beginning of a string literal
+                # Append the completed string literal to the classified tokens list
+                tokens_classified.append([temp_str.strip(), 'string literal']) #string literal classification
+            # flag to indicate whether we're inside a string literal
             is_string = not is_string
+            # Append the quote token to the classified tokens list, marked as an operator
             tokens_classified.append([tokens[i], 'operator'])
+        # If the current token is a separator
         elif re.match(separator_regex, tokens[i]):
+            # Append the separator token to the classified tokens list, marked as a separator
             tokens_classified.append([tokens[i],'separator'])
         elif re.match(operator_regex, tokens[i]):
             # Split compound operators into individual tokens
             ops = re.findall(r'\b\w{2,}\b|.', tokens[i])
             for op in ops:
                 tokens_classified.append([op, 'operator'])
-        elif re.match(keyword_regex, tokens[i]):
-            tokens_classified.append([tokens[i],'keyword'])
-        elif re.match(integer_regex, tokens[i]):
-            tokens_classified.append([tokens[i], 'integer'])
-        elif tokens[i-1] == '"' and tokens[i+1] == '"':
-            tokens_classified.append([tokens[i],'string literal'])
+        elif re.match(keyword_regex, tokens[i]):  #if current token is keyword
+            tokens_classified.append([tokens[i],'keyword']) #append to token list
+        elif re.match(integer_regex, tokens[i]): #if current token is a number
+            tokens_classified.append([tokens[i], 'integer']) #append to token list
+        elif tokens[i-1] == '"' and tokens[i+1] == '"':  #if current token is string literal
+            tokens_classified.append([tokens[i],'string literal']) #append string token to list
         else:
-            tokens_classified.append([tokens[i], 'identifier'])
+            tokens_classified.append([tokens[i], 'identifier']) #if token is identifier append to list
     
     # Printing output as described in instructions
     for tokens, classification in tokens_classified:
